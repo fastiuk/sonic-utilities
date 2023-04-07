@@ -116,3 +116,37 @@ def test_show_logging_tmpfs_syslog_1(run_command, cli_arguments, expected):
     runner = CliRunner()
     result = runner.invoke(show.cli.commands["logging"], cli_arguments)
     run_command.assert_called_with(EXPECTED_BASE_COMMAND + expected, display_cmd=False)
+
+
+class TestShowClock(object):
+    @classmethod
+    def setup_class(cls):
+        print('SETUP')
+        os.environ['UTILITIES_UNIT_TESTING'] = '1'
+
+    @patch('show.main.run_command')
+    def test_clock(self, mock_rc):
+        runner = CliRunner()
+
+        result = runner.invoke(show.cli.commands['clock'])
+        print(result.exit_code)
+        print(result.output)
+
+        assert result.exit_code == 0
+        mock_rc.assert_called_once_with('date')
+
+    @patch('show.main.run_command')
+    def test_timezone(self, mock_rc):
+        runner = CliRunner()
+
+        result = runner.invoke(
+            show.cli.commands['clock'].commands['timezones'])
+        print(result.exit_code)
+        print(result.output)
+
+        assert result.exit_code == 0
+        mock_rc.assert_called_once_with('timedatectl list-timezones')
+
+    @classmethod
+    def teardown_class(cls):
+        print('TEARDOWN')
